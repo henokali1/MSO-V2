@@ -1,0 +1,68 @@
+.card {
+  width: 200%;
+}
+
+#my-div {
+  background-color: #f00;
+  width: 200px;
+  height: 200px;
+}
+a.fill-div {
+  display: block;
+  height: 100%;
+  width: 100%;
+  text-decoration: none;
+}
+
+.mso_row {
+  margin-bottom: 0px;
+  border: 1px solid lightgray;
+}
+
+.title {
+  font-weight: bold;
+}
+
+.chip {
+  float: right !important;
+}
+
+#table_chip {
+  float: left !important;
+}
+
+#modal_row {
+  margin-top: 24px;
+  border: 1px solid lightgray;
+  margin-bottom: 0px;
+}
+
+table {
+  margin: 24px;
+  margin-right: 24px;
+}
+
+.modal {
+  width: 75% !important ;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box {
+  background: #f4f4f4;
+  padding: 10px;
+  text-align: left;
+}
+
+side-nav {
+  height: calc(100% - 115px) !important;
+  margin-left: 5% !important;
+}
+
+.brand-logo {
+  margin-left: 14%;
+}

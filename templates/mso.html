@@ -1,0 +1,69 @@
+{% extends 'base.html' %} {% block title %} MSO-{{mso.id}} {% endblock title %} {% block content %}
+
+<div class="container">
+    <ol>
+        <li>
+            <h5>MSO Number: MSO-{{mso.id}}</h5>
+        </li>
+        <li>
+            <h5>Posted On: {{mso.posted_on}}</h5>
+        </li>
+        <li>
+            <h5>Posted By: {{mso.posted_by}}</h5>
+        </li>
+        <li>
+            <h5>Rrequested By: {{mso.requested_by}}</h5>
+        </li>
+        <li>
+            <h5>Section: {{mso.section}}</h5>
+        </li>
+        <li>
+            <h5>Department Head: {{mso.department_head}}</h5>
+        </li>
+        <li>
+            <h5>Location: {{mso.location}}</h5>
+        </li>
+        <li>
+            <h5>Description of Service: {{mso.description_of_service}}</h5>
+        </li>
+        <li>
+            <h5>TSM Approval: {{mso.tsm_approval}}</h5>
+        </li>
+        <li>
+            <h5>TSM Approval Date {{mso.tsm_approval_date}}</h5>
+        </li>
+        <li>
+            <h5>Actual Work Descripition {{mso.actual_work_descripition}}</h5>
+        </li>
+        <li>
+            <h5>Purchase Requisition Number: {{mso.purchase_requisition_number}}</h5>
+        </li>
+        <li>
+            <h5>Purchase Requisition Date: {{mso.purchase_requisition_date}}</h5>
+        </li>
+        <li>
+            <h5>Date Started: {{mso.date_started}}</h5>
+        </li>
+        <li>
+            <h5>Date Compleated: {{mso.date_compleated}}</h5>
+        </li>
+        <li>
+            <h5>Work Compleated By: {{mso.work_compleated_by}}</h5>
+        </li>
+        <li>
+            <h5>ID Number: {{mso.id_number}}</h5>
+        </li>
+        <li>
+            <h5>Total Man Hours: {{mso.total_man_hours}}</h5>
+        </li>
+        <li>
+            <h5>Supervisor Approval: {{mso.supervisor_approval}}</h5>
+        </li>
+        <li>
+            <h5>Supervisor Approval Date: {{mso.supervisor_approval_date}}</h5>
+        </li>
+
+    </ol>
+
+</div>
+{% endblock content %}

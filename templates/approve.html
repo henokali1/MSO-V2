@@ -1,0 +1,45 @@
+{% extends 'base.html' %} {% block title %} MSO Request {% endblock title %} {% block content %}
+<div class="container">
+    {%for mso in msos %}
+    <div class="row mso_row" id="r{{mso.id}}">
+        <div class="col s12">
+            <br>
+            <span class="badge mso_number">MSO-{{mso.id}}</span>
+            <span class="title">Description of Service</span>
+            <blockquote>{{mso.description_of_service}}</blockquote>
+            <span class="title">Actual Work Description</span>
+            <blockquote>{{mso.actual_work_descripition}}</blockquote>
+
+            <div class="chip">
+                <img src="{{ url_for('static', filename='img/person1.jpg') }}" alt="Contact Person">By: {{mso.posted_by}}
+            </div>
+            <div class="chip">
+                {{mso.posted_on}}
+            </div>
+            <a id="approve_a" href="/approve_mso/{{mso.id}}" class="approve waves-effect waves-light green btn btn-small">Approve</a>
+            <a id="deny_a" class="deny_modal waves-effect waves-light red btn btn-small modal-trigger" href="#deny_modal">Deny</a>
+            <a id="read_mode_a" href="/mso/{{mso.id}}" class="waves-effect waves-light blue btn modal-trigger">Read More</a>
+            <br>
+            <br>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal Structure -->
+<div id="deny_modal" class="modal">
+    <div class="modal-content">
+        <h4>Comment</h4>
+        <div class="input-field">
+            <i class="material-icons prefix">assignment_ind</i>
+            <input id="deny_comment" type="text">
+            <label for="deny_comment">Comment....</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a id="comment_modal" href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Comment</a>
+        <a id="cancel_modal" href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+    </div>
+</div>
+
+{% endblock content %}

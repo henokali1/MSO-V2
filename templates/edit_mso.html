@@ -1,0 +1,146 @@
+{% extends 'base.html' %} {% block title %} Edit MSO-{{mso.id}} {% endblock title %} {% block content %}
+<div class="container">
+    <div class="card-panel grey lighten-4 grey-text text-darken-4 z-depth-0">
+        <form method="POST" action="">
+            <div id="mso_row" class="row">
+                <div class="col m6 s12">
+                    <!-- REQUESTED BY -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">assignment_ind</i>
+                        {% if mso.requested_by_other_department %}
+                        <input disabled id="requested_by" type="text" name="requested_by" value="{{mso.requested_by}}"> {% else %}
+                        <input id="requested_by" type="text" name="requested_by" value="{{mso.requested_by}}"> {% endif %}
+
+                        <label for="requested_by">Requested By</label>
+                    </div>
+                </div>
+
+                <div class="col m6 s12">
+                    <!-- SECTION -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">dehaze</i>
+                        <select id="section" name="section">
+                            <option value="">Section</option>
+                            {% if mso.section == 'agl' %}
+                            <option value="AGL" selected>AGL</option>
+                            <option value="CNS">CNS</option>
+                            <option value="SECURITY">Security</option>
+                            {% elif mso.section == 'cns' %}
+                            <option value="AGL">AGL</option>
+                            <option value="CNS" selected>CNS</option>
+                            <option value="SECURITY">Security</option>
+                            {% else %}
+                            <option value="AGL">AGL</option>
+                            <option value="CNS">CNS</option>
+                            <option value="SECURITY" selected>Security</option>
+                            {% endif %}
+                        </select>
+                        <label for="section">Section</label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="mso_row" class="row">
+                <div class="col m6 s12">
+                    <!-- DEPARTMENT HEAD -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">account_circle</i>
+                        {% if mso.requested_by_other_department %}
+                        <input disabled id="department_head" type="text" name="department_head" value="{{mso.department_head}}"> {% else %}
+                        <input id="department_head" type="text" name="department_head" value="{{mso.department_head}}"> {% endif %}
+
+                        <label for="department_head">Department Head</label>
+                    </div>
+                </div>
+
+                <div class="col m6 s12">
+                    <!-- LOCATION -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">add_location</i>
+                        {% if mso.requested_by_other_department %}
+                        <input disabled id="location" type="text" name="location" value="{{mso.location}}"> {% else %}
+                        <input id="location" type="text" name="location" value="{{mso.location}}"> {% endif %}
+                        <label for="location">Location</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="mso_row" class="row">
+
+                <div class="col m6 s12">
+                    <!-- DESCRIPTION OF SERVICE  -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">assignment</i>
+                        {% if mso.requested_by_other_department %}
+                        <textarea disabled id="description_of_service" class="materialize-textarea" name="description_of_service">{{mso.description_of_service}}</textarea> {% else %}
+                        <textarea id="description_of_service" class="materialize-textarea" name="description_of_service">{{mso.description_of_service}}</textarea> {% endif %}
+                        <label for="description_of_service">Description of Service</label>
+                    </div>
+
+                </div>
+
+                <div class="col m6 s12">
+                    <!-- ACTUAL WORK DESCRIPTION -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">assignment_turned_in</i>
+                        {% if mso.requested_by_other_department %}
+                        <textarea id="actual_work_description" class="materialize-textarea" name="actual_work_description"></textarea> {% else %}
+                        <textarea id="actual_work_description" class="materialize-textarea" name="actual_work_description">{{mso.actual_work_descripition}}</textarea> {% endif %}
+                        <label for="actual_work_description">Actual Work Description</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col m6 s12">
+                    <!-- DATE STARTED -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">date_range</i>
+                        {% if mso.requested_by_other_department %}
+                        <input type="text" class="datepicker" id="date_started" name="date_started"> {% else %}
+                        <input type="text" class="datepicker" id="date_started" name="date_started" value="{{mso.date_started}}"> {% endif %}
+                        <label for="date_started">Date Started</label>
+                    </div>
+                </div>
+                <div class="col m6 s12">
+                    <!-- DATE COMPLETED -->
+                    <div class="input-field">
+                        <i class="material-icons prefix">date_range</i>
+                        {% if mso.requested_by_other_department %}
+                        <input type="text" class="datepicker" id="date_completed" name="date_completed"> {% else %}
+                        <input type="text" class="datepicker" id="date_completed" name="date_completed" value="{{mso.date_compleated}}"> {% endif %}
+
+                        <label for="date_completed">Date Completed</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- WORK COMPLETED BY -->
+            <div class="input-field">
+                <select name="work_completed_by" multiple>
+                    <option value="" disabled selected>Work Completed By</option>
+                    {% for technician in technicians %}
+                    <option value="{{ technician }}" {% if technician in mso.work_compleated_by %} selected {% endif %}>{{ technician }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    <div>
+                        <input type="submit" value="Update" class="btn left">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- ./ CONTAINER END -->
+
+<!-- MOVES CONTENT UP -->
+<div style=" margin-top: 500px; "></div>
+
+{% endblock content %}

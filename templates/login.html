@@ -1,0 +1,31 @@
+{% extends 'base.html' %} {% block title %} Login {% endblock title %} {% block linktag %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_style.css') }}"> {% endblock linktag %} {% block content %} % if session.logged_in == NULL %}
+<div class="container white z-depth-2">
+  <div id="login" class="col s12">
+    <form action="" method="POST" class="col s12">
+      <div class="form-container">
+        <h3 class="teal-text">Login</h3>
+        <div class="row">
+          <div class="input-field col s12">
+            <label>Email</label>
+            <input type="text" name="email" class="form-control" value={{request.form.email}}>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control input-field" value={{request.form.password}}>
+          </div>
+        </div>
+        <br>
+        <center>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <br>
+          <br>
+          <a href="#">Forgotten password?</a>
+        </center>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %} {% endblock content %}
