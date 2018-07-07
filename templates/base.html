@@ -64,35 +64,56 @@
         <!-- Move the sidenav outside of .navbar-fixed -->
         <ul class="side-nav" id="mobile-demo">
             {% if session.logged_in %}
-            <li>
-                <p></p>
-            </li>
-            <li>
-                <a href="/new_mso">New MSO</a>
-            </li>
-            <li>
-                <a href="/mso_request">MSO Request</a>
-            </li>
-            <li>
-                <a href="/approve">Approve MSO's</a>
-            </li>
-            <li>
-                <a href="/mso_new">All MSO's</a>
-            </li>
-            <li>
-                <a href="/logout">Logout</a>
-            </li>
-            {% else %}
-            <li>
-                <a href="/register">Register</a>
-            </li>
-            <li>
-                <a href="/login">Login</a>
-            </li>
-            {% endif %}
+            <ul id="slide-out" class="sidenav">
+                <li>
+                    <div class="user-view">
+                        <div class="background">
+                            <img src="{{ url_for('static', filename='img/img1.jpg') }}">
+                        </div>
+                        <a href="#user">
+                            <img class="circle" src="{{ url_for('static', filename='img/person1.jpg') }}">
+                        </a>
+                        <a href="#name">
+                            <span class="white-text name">John Doe</span>
+                        </a>
+                        <a href="#email">
+                            <span class="white-text email">jdandturk@gmail.com</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <a href="/new_mso">New MSO</a>
+                </li>
+                <li>
+                    <a href="/mso_request">MSO Request</a>
+                </li>
+                <li>
+                    <a href="/approve">Approve MSO's</a>
+                </li>
+                <li>
+                    <a href="/mso_new">All MSO's</a>
+                </li>
+                <li>
+                    <a href="/logout">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="/register">Register</a>
+                </li>
+                <li>
+                    <a href="/login">Login</a>
+                </li>
+                {% endif %}
+                <li>
+                    <div class="divider"></div>
+                </li>
+                <li>
+                    <p></p>
+                </li>
+            </ul>
         </ul>
-    </header>
 
+    </header>
 
     {% block content %} {% endblock content %}
 
