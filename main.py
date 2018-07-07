@@ -47,7 +47,8 @@ def current_user():
     first_name = current_user['first_name'].encode('utf8')
     job_title = current_user['job_title'].encode('utf8')
     department = current_user['department'].encode('utf8')
-    return {'first_name': first_name, 'job_title': job_title, 'department': department}
+    email = current_user['email'].encode('utf8')
+    return {'first_name': first_name, 'job_title': job_title, 'department': department, 'email': email}
 
 # New MSO
 
@@ -102,7 +103,6 @@ def new():
     for i in all_technicians:
         technicians.append(i['first_name'].encode('utf8').capitalize() +
                            ' ' + i['last_name'].encode('utf8').capitalize())
-    print(technicians)
 
     return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'])
 
@@ -139,7 +139,7 @@ def mso(id):
 
     mso = cur.fetchone()
 
-    return render_template('mso.html', mso=mso, current_user=current_user()['first_name'])
+    return render_template('mso.html', mso=mso, current_user=current_user()['first_name'], email=current_user()['email'])
 
 # Articles
 
@@ -407,7 +407,6 @@ def approve_mso(id):
 
         # Close connection
         cur.close()
-        print('MSO-'+str(id) + ' approved by TSM')
         return 'nothing'
     elif (current_user()['job_title'] == 'supervisor'):
         # Create cursor
@@ -422,11 +421,10 @@ def approve_mso(id):
 
         # Close connection
         cur.close()
-        print('mso-'+str(id) + ' approved by supervisor')
         return 'nothing'
 
     else:
-        print('Not Authorized. Only TSM or Supervisor can approve mso\'s')
+        pass
 
     # Create cursor
     print "Ajax is called id = " + id
@@ -623,9 +621,6 @@ def mso_request():
         # Get current user
         user_email = current_user()['first_name']
 
-        print(user_email, requested_by, department_head,
-              location, description_of_service, 1)
-
         # Execute
         cur.execute("INSERT INTO tsd_mso_form(posted_by, requested_by, department_head, location, description_of_service, requested_by_other_department) VALUES(%s, %s, %s, %s, %s, %s)",
                     (user_email, requested_by, department_head, location, description_of_service, 1))
@@ -639,7 +634,6 @@ def mso_request():
         flash('MSO Request Successfull', 'success')
 
         return redirect(url_for('mso_request'))
-    print('last')
 
     return render_template('mso_request.html', current_user=current_user()['first_name'])
 

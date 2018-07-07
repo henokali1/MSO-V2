@@ -74,10 +74,10 @@
                             <img class="circle" src="{{ url_for('static', filename='img/person1.jpg') }}">
                         </a>
                         <a href="#name">
-                            <span class="white-text name">John Doe</span>
+                            <span class="white-text name">{{ current_user }}</span>
                         </a>
                         <a href="#email">
-                            <span class="white-text email">jdandturk@gmail.com</span>
+                            <span class="white-text email">{{ email }}</span>
                         </a>
                     </div>
                 </li>
@@ -91,7 +91,7 @@
                     <a href="/approve">Approve MSO's</a>
                 </li>
                 <li>
-                    <a href="/mso_new">All MSO's</a>
+                    <a href="/all_mso">All MSO's</a>
                 </li>
                 <li>
                     <a href="/logout">Logout</a>
