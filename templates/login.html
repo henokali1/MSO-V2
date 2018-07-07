@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block title %} Login {% endblock title %} {% block linktag %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home_style.css') }}"> {% endblock linktag %} {% block content %} % if session.logged_in == NULL %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_style.css') }}"> {% endblock linktag %} {% block content %} {% if session.logged_in == NULL %}
 <div class="container white z-depth-2">
   <div id="login" class="col s12">
     <form action="" method="POST" class="col s12">
