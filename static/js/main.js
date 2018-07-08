@@ -79,13 +79,8 @@ $(".approve").click(function(e) {
   var divId = $(this)
     .parents(".mso_row")
     .attr("id");
-
-  var msoNumber = $(this)
-    .parent()
-    .children(".badge")
-    .text();
-
-  Materialize.toast(msoNumber + " Approved!", 5000);
+  var msoNumber = parseInt(event.target.id);
+  Materialize.toast("MSO-" + msoNumber + " Approved!", 5000);
   e.preventDefault();
   $("#" + divId).toggle(1000, "swing", function() {});
 

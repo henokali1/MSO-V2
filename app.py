@@ -423,7 +423,6 @@ def approve_mso(id):
     else:
         pass
 
-    # Create cursor
     print "Ajax is called id = " + id
     return "nothing"
 

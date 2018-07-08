@@ -26,10 +26,10 @@
             <nav class="blue darken-4">
                 <div class="nav-wrapper">
                     <a href="/" class="brand-logo">FIA Logo</a>
-                    <a href="/" data-activates="mobile-demo" class="button-collapse">
+                    <a href="/" data-activates="mobile-demo" class="button-collapse show-on-large">
                         <i class="material-icons">menu</i>
                     </a>
-                    <ul class="right hide-on-med-and-down">
+                    <ul class="right">
                         {% if session.logged_in %}
                         <li>
                             <p>{{ current_user }}</p>
@@ -68,7 +68,7 @@
                 <li>
                     <div class="user-view">
                         <div class="background">
-                            <img src="{{ url_for('static', filename='img/img1.jpg') }}">
+                            <img src="{{ url_for('static', filename='img/img2.jpg') }}">
                         </div>
                         <a href="#user">
                             <img class="circle" src="{{ url_for('static', filename='img/person1.jpg') }}">
