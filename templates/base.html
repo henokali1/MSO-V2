@@ -32,9 +32,6 @@
                     <ul class="right">
                         {% if session.logged_in %}
                         <li>
-                            <p>{{ current_user }}</p>
-                        </li>
-                        <li>
                             <a href="/new_mso">New MSO</a>
                         </li>
                         <li>
@@ -52,9 +49,6 @@
                         {% else %}
                         <li>
                             <a href="/register">Register</a>
-                        </li>
-                        <li>
-                            <a href="/login">Login</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -99,9 +93,6 @@
                 {% else %}
                 <li>
                     <a href="/register">Register</a>
-                </li>
-                <li>
-                    <a href="/login">Login</a>
                 </li>
                 {% endif %}
                 <li>

@@ -101,7 +101,7 @@ def new():
         technicians.append(i['first_name'].encode('utf8').capitalize() +
                            ' ' + i['last_name'].encode('utf8').capitalize())
 
-    return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'])
+    return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'], email=current_user()['email'])
 
 # MSO's
 
@@ -117,10 +117,10 @@ def all_mso():
     msos = cur.fetchall()
 
     if result > 0:
-        return render_template('all_mso.html', msos=msos, current_user=current_user()['first_name'])
+        return render_template('all_mso.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
     else:
         msg = 'No MSO\'s Found'
-        return render_template('all_mso', msg=msg)
+        return render_template('all_mso', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
     # Close db connection
     cur.close()
 
@@ -369,7 +369,7 @@ def approve():
         msos = cur.fetchall()
 
         cur.close()
-        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'])
+        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
     elif (current_user()['job_title'] == 'supervisor'):
         # Create cursor
         cur = mysql.connection.cursor()
@@ -381,10 +381,10 @@ def approve():
         msos = cur.fetchall()
 
         cur.close()
-        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'])
+        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
     else:
         msg = 'Only Department Heades or Supervisor\'s can approve MSO\'s'
-        return render_template('not_authorized.html', msg=msg, current_user=current_user()['first_name'])
+        return render_template('not_authorized.html', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
 
 
 # Approve MSO through AJAX request.
@@ -427,8 +427,6 @@ def approve_mso(id):
     return "nothing"
 
 # Edit MSO
-
-
 @app.route('/mso/edit/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def edit_mso(id):
@@ -631,7 +629,7 @@ def mso_request():
 
         return redirect(url_for('mso_request'))
 
-    return render_template('mso_request.html', current_user=current_user()['first_name'])
+    return render_template('mso_request.html', current_user=current_user()['first_name'], email=current_user()['email'])
 
 # Delete MSO
 
