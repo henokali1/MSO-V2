@@ -21,15 +21,7 @@ mysql = MySQL(app)
 def index():
     return render_template('login.html')
 
-
-# About
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
 # Get current user detailes
-
-
 def current_user():
     # Create Cursor
     cur = mysql.connection.cursor()
@@ -48,8 +40,6 @@ def current_user():
     return {'first_name': first_name, 'job_title': job_title, 'department': department, 'email': email}
 
 # New MSO
-
-
 @app.route('/new_mso', methods=['GET', 'POST'])
 def new():
     if request.method == 'POST':
@@ -104,8 +94,6 @@ def new():
     return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'], email=current_user()['email'])
 
 # MSO's
-
-
 @app.route('/all_mso')
 def all_mso():
     # Create cursor
@@ -124,7 +112,6 @@ def all_mso():
     # Close db connection
     cur.close()
 
-
 # Single MSO
 @app.route('/mso/<string:id>/')
 def mso(id):
@@ -137,41 +124,6 @@ def mso(id):
     mso = cur.fetchone()
 
     return render_template('mso.html', mso=mso, current_user=current_user()['first_name'], email=current_user()['email'])
-
-# Articles
-
-
-@app.route('/articles')
-def articles():
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Get articles
-    result = cur.execute("SELECT * FROM articles")
-
-    articles = cur.fetchall()
-
-    if result > 0:
-        return render_template('articles.html', articles=articles)
-    else:
-        msg = 'No Articles Found'
-        return render_template('articles.html', msg=msg)
-    # Close connection
-    cur.close()
-
-
-# Single Article
-@app.route('/article/<string:id>/')
-def article(id):
-    # Create cursor
-    cur = mysql.connection.cursor()
-
-    # Get article
-    cur.execute("SELECT * FROM articles WHERE id = %s", [id])
-
-    article = cur.fetchone()
-
-    return render_template('article.html', article=article)
 
 
 # Register Form Class
@@ -265,8 +217,6 @@ def login():
     return render_template('login.html')
 
 # Check if user logged in
-
-
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -278,8 +228,6 @@ def is_logged_in(f):
     return wrap
 
 # Logout
-
-
 @app.route('/logout')
 @is_logged_in
 def logout():
@@ -287,74 +235,7 @@ def logout():
     flash('You are now logged out', 'success')
     return redirect(url_for('login'))
 
-# Dashboard
-
-
-@app.route('/dashboard')
-@is_logged_in
-def dashboard():
-    # Create cursor
-    # cur = mysql.connection.cursor()
-
-    # # Get articles
-    # result = cur.execute("SELECT * FROM articles")
-
-    # articles = cur.fetchall()
-
-    # if result > 0:
-    #     return render_template('dashboard.html', articles=articles)
-    # else:
-    #     msg = 'No Articles Found'
-    #     return render_template('dashboard.html', msg=msg)
-    # # Close connection
-    # cur.close()
-    return render_template('dashboard.html')
-
-
-# Article Form Class
-class ArticleForm(Form):
-    title = StringField('Title', [validators.Length(min=1, max=200)])
-    body = TextAreaField('Body', [validators.Length(min=30)])
-
-
-# Add Article
-@app.route('/add_article', methods=['GET', 'POST'])
-@is_logged_in
-def add_article():
-    form = ArticleForm(request.form)
-    if request.method == 'POST' and form.validate():
-        title = form.title.data
-        body = form.body.data
-
-        # Create Cursor
-        cur = mysql.connection.cursor()
-
-        # Execute
-        cur.execute("INSERT INTO articles(title, body, author) VALUES(%s, %s, %s)",
-                    (title, body, session['email']))
-
-        # Commit to DB
-        mysql.connection.commit()
-
-        # Close connection
-        cur.close()
-
-        flash('Article Created', 'success')
-
-        return redirect(url_for('all_mso'))
-
-    return render_template('add_article.html', form=form)
-
-# Print MSO with the old(paper based) template.
-
-
-@app.route('/mso_print')
-def mso_print():
-    return render_template('mso_print.html')
-
 # Approve MSO
-
-
 @app.route('/approve')
 @is_logged_in
 def approve():
@@ -557,12 +438,7 @@ def edit_mso(id):
         return render_template('not_authorized.html', msg=msg, mso=mso)
 
 
-# Edit Article
 
-
-@app.route('/edit_article/<string:id>', methods=['GET', 'POST'])
-@is_logged_in
-def edit_article(id):
     # Create cursor
     cur = mysql.connection.cursor()
 
@@ -632,8 +508,6 @@ def mso_request():
     return render_template('mso_request.html', current_user=current_user()['first_name'], email=current_user()['email'])
 
 # Delete MSO
-
-
 @app.route('/mso/delete/<string:id>', methods=['GET', 'POST'])
 def delete_mso(id):
     # Create cursor
@@ -658,12 +532,7 @@ def delete_mso(id):
         return render_template('not_authorized.html', msg=msg)
 
 
-# Delete Article
 
-
-@app.route('/delete_article/<string:id>', methods=['POST'])
-@is_logged_in
-def delete_article(id):
     # Create cursor
     cur = mysql.connection.cursor()
 
