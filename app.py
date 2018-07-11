@@ -12,9 +12,15 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = '@tmsqe!1321'
 app.config['MYSQL_DB'] = 'MSO'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
 # init MYSQL
 mysql = MySQL(app)
 
+# Authorizations
+tsm_auth = ['new_mso', 'mso_request', 'approve', 'all_mso', 'login', 'logout']
+tss_auth = ['new_mso', 'mso_request', 'approve', 'all_mso', 'login', 'logout']
+other_auth = ['mso_request', 'login', 'logout']
+technician_auth = ['new_mso', 'all_mso', 'login', 'logout']
 
 # Index
 @app.route('/')
