@@ -163,21 +163,24 @@ def new():
 @app.route('/all_mso')
 @is_logged_in
 def all_mso():
-    # Create cursor
-    cur = mysql.connection.cursor()
+    if (current_user()['job_title'] in all_mso_auth) and (current_user()['department'] == 'COMNAV'):
+        # Create cursor
+        cur = mysql.connection.cursor()
 
-    # Get MSO's
-    result = cur.execute("SELECT * FROM tsd_mso_form ORDER BY id DESC")
+        # Get MSO's
+        result = cur.execute("SELECT * FROM tsd_mso_form ORDER BY id DESC")
 
-    msos = cur.fetchall()
+        msos = cur.fetchall()
 
-    if result > 0:
-        return render_template('all_mso.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
+        if result > 0:
+            return render_template('all_mso.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
+        else:
+            msg = 'No MSO\'s Found'
+            return render_template('all_mso', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
+        # Close db connection
+        cur.close()
     else:
-        msg = 'No MSO\'s Found'
-        return render_template('all_mso', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
-    # Close db connection
-    cur.close()
+        return render_template('not_authorized.html')
 
 # Single MSO
 @app.route('/mso/<string:id>/')
