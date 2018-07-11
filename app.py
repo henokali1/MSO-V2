@@ -17,10 +17,66 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 # Authorizations
-tsm_auth = ['new_mso', 'mso_request', 'approve', 'all_mso', 'login', 'logout']
-tss_auth = ['new_mso', 'mso_request', 'approve', 'all_mso', 'login', 'logout']
-other_auth = ['mso_request', 'login', 'logout']
-technician_auth = ['new_mso', 'all_mso', 'login', 'logout']
+new_auth = ['department_head', 'supervisor', 'technician']
+all_mso_auth = ['department_head', 'supervisor', 'technician']
+mso_auth = ['department_head', 'supervisor', 'technician']
+approve_auth = ['department_head', 'supervisor']
+approve_mso_auth = ['department_head', 'supervisor']
+edit_mso_auth = ['department_head', 'supervisor', 'technician', 'OTHER']
+mso_request_auth = ['OTHER']
+
+# User login, 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Get Form Fields
+        email = request.form['email']
+        password_candidate = request.form['password']
+        # Create cursor
+        cur = mysql.connection.cursor()
+
+        # Get user by email
+        result = cur.execute(
+            "SELECT * FROM users WHERE email = %s", [email])
+
+        if result > 0:
+            # Get stored hash
+            data = cur.fetchone()
+            password = data['password']
+
+            # Compare Passwords
+            if sha256_crypt.verify(password_candidate, password):
+                # Passed
+                session['logged_in'] = True
+                session['email'] = email
+
+                flash('You are now logged in', 'success')
+                if current_user()['department'] == 'OTHER':
+                    return redirect(url_for('mso_request'))
+                elif (current_user()['job_title'] == 'supervisor') or (current_user()['job_title'] == 'department_head'):
+                    return redirect(url_for('approve'))
+                else:
+                    return redirect(url_for('all_mso'))
+            else:
+                error = 'Invalid login'
+                return render_template('login.html', error=error)
+            # Close connection
+            cur.close()
+        else:
+            error = 'User not found'
+            return render_template('login.html', error=error)
+    return render_template('login.html')
+
+# Check if user logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
 
 # Index
 @app.route('/')
@@ -47,8 +103,9 @@ def current_user():
 
 # New MSO
 @app.route('/new_mso', methods=['GET', 'POST'])
+@is_logged_in
 def new():
-    if request.method == 'POST':
+    if (current_user()['job_title'] in new_auth) and (current_user()['department'] == 'COMNAV') and (request.method == 'POST'):
         requested_by = request.form.get('requested_by')
         section = request.form.get('section')
         department_head = request.form.get('department_head')
@@ -83,24 +140,28 @@ def new():
         flash('MSO Created', 'success')
 
         return redirect(url_for('all_mso'))
-    # Create Cursor
-    cur = mysql.connection.cursor()
-    # Get technicians
-    cur.execute(
-        "SELECT first_name, last_name FROM users WHERE job_title=%s", ['technician'])
-    all_technicians = cur.fetchall()
-    # Close Connection
-    cur.close()
+    elif request.method == 'GET' and (current_user()['job_title'] in new_auth) and (current_user()['department'] == 'COMNAV'):
+        # Create Cursor
+        cur = mysql.connection.cursor()
+        # Get technicians
+        cur.execute(
+            "SELECT first_name, last_name FROM users WHERE job_title=%s", ['technician'])
+        all_technicians = cur.fetchall()
+        # Close Connection
+        cur.close()
 
-    technicians = []
-    for i in all_technicians:
-        technicians.append(i['first_name'].encode('utf8').capitalize() +
-                           ' ' + i['last_name'].encode('utf8').capitalize())
+        technicians = []
+        for i in all_technicians:
+            technicians.append(i['first_name'].encode('utf8').capitalize() +
+                            ' ' + i['last_name'].encode('utf8').capitalize())
 
-    return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'], email=current_user()['email'])
+        return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'], email=current_user()['email'])
+    else:
+        return render_template('not_authorized.html')
 
 # MSO's
 @app.route('/all_mso')
+@is_logged_in
 def all_mso():
     # Create cursor
     cur = mysql.connection.cursor()
@@ -120,6 +181,7 @@ def all_mso():
 
 # Single MSO
 @app.route('/mso/<string:id>/')
+@is_logged_in
 def mso(id):
     # Create cursor
     cur = mysql.connection.cursor()
@@ -179,60 +241,6 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
-
-# User login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        # Get Form Fields
-        email = request.form['email']
-        password_candidate = request.form['password']
-        # Create cursor
-        cur = mysql.connection.cursor()
-
-        # Get user by email
-        result = cur.execute(
-            "SELECT * FROM users WHERE email = %s", [email])
-
-        if result > 0:
-            # Get stored hash
-            data = cur.fetchone()
-            password = data['password']
-
-            # Compare Passwords
-            if sha256_crypt.verify(password_candidate, password):
-                # Passed
-                session['logged_in'] = True
-                session['email'] = email
-
-                flash('You are now logged in', 'success')
-                if current_user()['department'] == 'OTHER':
-                    return redirect(url_for('mso_request'))
-                elif (current_user()['job_title'] == 'supervisor') or (current_user()['job_title'] == 'department_head'):
-                    return redirect(url_for('approve'))
-                else:
-                    return redirect(url_for('all_mso'))
-            else:
-                error = 'Invalid login'
-                return render_template('login.html', error=error)
-            # Close connection
-            cur.close()
-        else:
-            error = 'User not found'
-            return render_template('login.html', error=error)
-    return render_template('login.html')
-
-# Check if user logged in
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, Please login', 'danger')
-            return redirect(url_for('login'))
-    return wrap
-
 # Logout
 @app.route('/logout')
 @is_logged_in
@@ -276,6 +284,7 @@ def approve():
 
 # Approve MSO through AJAX request.
 @app.route('/approve_mso/<string:id>')
+@is_logged_in
 def approve_mso(id):
     id = id.replace('MSO-', '')
     if (current_user()['job_title'] == 'department_head'):
@@ -485,6 +494,7 @@ def edit_mso(id):
 
 # MSO Request
 @app.route('/mso_request', methods=['GET', 'POST'])
+@is_logged_in
 def mso_request():
     if request.method == 'POST':
         requested_by = request.form.get('requested_by')
@@ -515,6 +525,7 @@ def mso_request():
 
 # Delete MSO
 @app.route('/mso/delete/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
 def delete_mso(id):
     # Create cursor
     cur = mysql.connection.cursor()
