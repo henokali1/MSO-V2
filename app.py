@@ -25,7 +25,8 @@ approve_mso_auth = ['department_head', 'supervisor']
 edit_mso_auth = ['department_head', 'supervisor', 'technician', 'OTHER']
 mso_request_auth = ['OTHER']
 
-# User login, 
+
+# User login,
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -36,8 +37,7 @@ def login():
         cur = mysql.connection.cursor()
 
         # Get user by email
-        result = cur.execute(
-            "SELECT * FROM users WHERE email = %s", [email])
+        result = cur.execute("SELECT * FROM users WHERE email = %s", [email])
 
         if result > 0:
             # Get stored hash
@@ -53,7 +53,8 @@ def login():
                 flash('You are now logged in', 'success')
                 if current_user()['department'] == 'OTHER':
                     return redirect(url_for('mso_request'))
-                elif (current_user()['job_title'] == 'supervisor') or (current_user()['job_title'] == 'department_head'):
+                elif (current_user()['job_title'] == 'supervisor') or (
+                        current_user()['job_title'] == 'department_head'):
                     return redirect(url_for('approve'))
                 else:
                     return redirect(url_for('all_mso'))
@@ -67,6 +68,7 @@ def login():
             return render_template('login.html', error=error)
     return render_template('login.html')
 
+
 # Check if user logged in
 def is_logged_in(f):
     @wraps(f)
@@ -76,12 +78,15 @@ def is_logged_in(f):
         else:
             flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
+
     return wrap
+
 
 # Index
 @app.route('/')
 def index():
     return render_template('login.html')
+
 
 # Get current user detailes
 def current_user():
@@ -95,17 +100,58 @@ def current_user():
 
     cur.close()
 
+    id = current_user['id']
     first_name = current_user['first_name'].encode('utf8')
+    last_name = current_user['last_name'].encode('utf8')
     job_title = current_user['job_title'].encode('utf8')
+    airport_id = current_user['airport_id']
     department = current_user['department'].encode('utf8')
     email = current_user['email'].encode('utf8')
-    return {'first_name': first_name, 'job_title': job_title, 'department': department, 'email': email}
+    return {
+        'id': id,
+        'first_name': first_name,
+        'last_name': last_name,
+        'job_title': job_title,
+        'airport_id': airport_id,
+        'department': department,
+        'email': email
+    }
+
+
+# Get user detailes by id
+def get_user(id):
+    # Create Cursor
+    cur = mysql.connection.cursor()
+
+    # Get current user
+    cur.execute("SELECT * FROM users WHERE id = %s", [id])
+    current_user = cur.fetchone()
+
+    cur.close()
+
+    first_name = current_user['first_name'].encode('utf8')
+    last_name = current_user['last_name'].encode('utf8')
+    job_title = current_user['job_title'].encode('utf8')
+    airport_id = current_user['airport_id']
+    department = current_user['department'].encode('utf8')
+    email = current_user['email'].encode('utf8')
+    return {
+        'id': id,
+        'first_name': first_name,
+        'last_name': last_name,
+        'job_title': job_title,
+        'airport_id': airport_id,
+        'department': department,
+        'email': email
+    }
+
 
 # New MSO
 @app.route('/new_mso', methods=['GET', 'POST'])
 @is_logged_in
 def new():
-    if (current_user()['job_title'] in new_auth) and (current_user()['department'] == 'COMNAV') and (request.method == 'POST'):
+    if (current_user()['job_title'] in new_auth) and (current_user(
+    )['department'] == 'COMNAV') and (request.method == 'POST'):
         requested_by = request.form.get('requested_by')
         section = request.form.get('section')
         department_head = request.form.get('department_head')
@@ -117,19 +163,24 @@ def new():
         work_completed_by = request.form.getlist('work_completed_by')
         work_completed_by = [x.encode('utf-8') for x in work_completed_by]
         work_completed_by = ','.join(str(e) for e in work_completed_by)
-
         # Create Cursor
         cur = mysql.connection.cursor()
 
         # Get current user
-        cur.execute("SELECT first_name FROM users WHERE email = %s", [
-            session['email'].encode('utf8')])
+        cur.execute("SELECT first_name FROM users WHERE email = %s",
+                    [session['email'].encode('utf8')])
 
-        current_user_first_name = cur.fetchone()
+        user_id = current_user()['id']
+
+        posted_by = current_user()['first_name'] + ' ' + current_user(
+        )['last_name']
 
         # Execute
-        cur.execute("INSERT INTO tsd_mso_form(posted_by, requested_by, section, department_head, location, description_of_service, actual_work_descripition, date_started, date_compleated, work_compleated_by) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (current_user_first_name['first_name'].encode('utf8'), requested_by, section, department_head, location, description_of_service, actual_work_description, date_started, date_completed, work_completed_by))
+        cur.execute(
+            "INSERT INTO tsd_mso_form(id_number, posted_by, requested_by, section, department_head, location, description_of_service, actual_work_descripition, date_started, date_compleated, work_compleated_by) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (user_id, posted_by, requested_by, section, department_head,
+             location, description_of_service, actual_work_description,
+             date_started, date_completed, work_completed_by))
 
         # Commit to DB
         mysql.connection.commit()
@@ -140,12 +191,14 @@ def new():
         flash('MSO Created', 'success')
 
         return redirect(url_for('all_mso'))
-    elif request.method == 'GET' and (current_user()['job_title'] in new_auth) and (current_user()['department'] == 'COMNAV'):
+    elif request.method == 'GET' and (current_user(
+    )['job_title'] in new_auth) and (current_user()['department'] == 'COMNAV'):
         # Create Cursor
         cur = mysql.connection.cursor()
         # Get technicians
         cur.execute(
-            "SELECT first_name, last_name FROM users WHERE job_title=%s", ['technician'])
+            "SELECT first_name, last_name FROM users WHERE job_title=%s",
+            ['technician'])
         all_technicians = cur.fetchall()
         # Close Connection
         cur.close()
@@ -153,17 +206,23 @@ def new():
         technicians = []
         for i in all_technicians:
             technicians.append(i['first_name'].encode('utf8').capitalize() +
-                            ' ' + i['last_name'].encode('utf8').capitalize())
+                               ' ' +
+                               i['last_name'].encode('utf8').capitalize())
 
-        return render_template('new_mso.html', technicians=technicians, current_user=current_user()['first_name'], email=current_user()['email'])
+        return render_template(
+            'new_mso.html',
+            technicians=technicians,
+            current_user=current_user())
     else:
         return render_template('not_authorized.html')
+
 
 # MSO's
 @app.route('/all_mso')
 @is_logged_in
 def all_mso():
-    if (current_user()['job_title'] in all_mso_auth) and (current_user()['department'] == 'COMNAV'):
+    if (current_user()['job_title'] in all_mso_auth) and (
+            current_user()['department'] == 'COMNAV'):
         # Create cursor
         cur = mysql.connection.cursor()
 
@@ -173,28 +232,36 @@ def all_mso():
         msos = cur.fetchall()
 
         if result > 0:
-            return render_template('all_mso.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
+            return render_template(
+                'all_mso.html', msos=msos, current_user=current_user())
         else:
             msg = 'No MSO\'s Found'
-            return render_template('all_mso', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
+            return render_template(
+                'all_mso.html', msg=msg, current_user=current_user())
         # Close db connection
         cur.close()
     else:
         return render_template('not_authorized.html')
 
+
 # Single MSO
 @app.route('/mso/<string:id>/')
 @is_logged_in
 def mso(id):
-    # Create cursor
-    cur = mysql.connection.cursor()
+    if (current_user()['job_title'] in mso_auth) and (
+            current_user()['department'] == 'COMNAV'):
+        # Create cursor
+        cur = mysql.connection.cursor()
 
-    # Get MSO
-    cur.execute("SELECT * FROM tsd_mso_form WHERE id = %s", [id])
+        # Get MSO
+        cur.execute("SELECT * FROM tsd_mso_form WHERE id = %s", [id])
 
-    mso = cur.fetchone()
+        mso = cur.fetchone()
 
-    return render_template('mso.html', mso=mso, current_user=current_user()['first_name'], email=current_user()['email'])
+        return render_template(
+            'mso.html', mso=mso, current_user=current_user())
+    else:
+        return render_template('not_authorized.html')
 
 
 # Register Form Class
@@ -203,10 +270,13 @@ class RegisterForm(Form):
     last_name = StringField('Last Name', [validators.Length(min=1, max=50)])
     airport_id = StringField('Airport ID Number', [validators.Length(min=1)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
-    job_title = SelectField(u'Job Title', choices=[('', ''), ('department_head', 'Department Head'), (
-        'supervisor', 'Supervisor'), ('technician', 'Technician')])
-    department = SelectField(u'Department', choices=[(
-        '', ''), ('COMNAV', 'COMNAV'), ('OTHER', 'OTHER')])
+    job_title = SelectField(
+        u'Job Title',
+        choices=[('', ''), ('department_head', 'Department Head'),
+                 ('supervisor', 'Supervisor'), ('technician', 'Technician')])
+    department = SelectField(
+        u'Department',
+        choices=[('', ''), ('COMNAV', 'COMNAV'), ('OTHER', 'OTHER')])
     password = PasswordField('Password', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')
@@ -230,8 +300,9 @@ def register():
         cur = mysql.connection.cursor()
 
         # Execute query
-        cur.execute("INSERT INTO users(first_name, last_name, airport_id, email, job_title, password) VALUES(%s, %s, %s, %s, %s, %s)",
-                    (first_name, last_name, airport_id, email, job_title, password))
+        cur.execute(
+            "INSERT INTO users(first_name, last_name, airport_id, email, job_title, password) VALUES(%s, %s, %s, %s, %s, %s)",
+            (first_name, last_name, airport_id, email, job_title, password))
 
         # Commit to DB
         mysql.connection.commit()
@@ -244,6 +315,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
+
 # Logout
 @app.route('/logout')
 @is_logged_in
@@ -251,6 +323,7 @@ def logout():
     session.clear()
     flash('You are now logged out', 'success')
     return redirect(url_for('login'))
+
 
 # Approve MSO
 @app.route('/approve')
@@ -261,28 +334,46 @@ def approve():
         cur = mysql.connection.cursor()
 
         # Get MSO's
-        cur.execute(
-            "SELECT * FROM tsd_mso_form WHERE tsm_approval IS NULL ORDER BY id DESC")
-
+        result = cur.execute(
+            "SELECT * FROM tsd_mso_form WHERE tsm_approval IS NULL ORDER BY id DESC"
+        )
         msos = cur.fetchall()
 
         cur.close()
-        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
+        if result > 0:
+            return render_template(
+                'approve.html',
+                msos=msos,
+                current_user=current_user(),
+            )
+        else:
+            msg = 'No Pending MSO\'s to Approval.'
+            return render_template(
+                'all_mso.html', msg=msg, current_user=current_user())
+
     elif (current_user()['job_title'] == 'supervisor'):
         # Create cursor
         cur = mysql.connection.cursor()
 
         # Get MSO's
-        cur.execute(
-            "SELECT * FROM tsd_mso_form WHERE supervisor_approval IS NULL ORDER BY id DESC")
+        result = cur.execute(
+            "SELECT * FROM tsd_mso_form WHERE supervisor_approval IS NULL ORDER BY id DESC"
+        )
 
         msos = cur.fetchall()
 
         cur.close()
-        return render_template('approve.html', msos=msos, current_user=current_user()['first_name'], email=current_user()['email'])
+        if result > 0:
+            return render_template(
+                'approve.html', msos=msos, current_user=current_user())
+        else:
+            msg = 'No Pending MSO\'s to Approval.'
+            return render_template(
+                'all_mso.html', msg=msg, current_user=current_user())
     else:
         msg = 'Only Department Heades or Supervisor\'s can approve MSO\'s'
-        return render_template('not_authorized.html', msg=msg, current_user=current_user()['first_name'], email=current_user()['email'])
+        return render_template(
+            'not_authorized.html', msg=msg, current_user=current_user())
 
 
 # Approve MSO through AJAX request.
@@ -296,7 +387,8 @@ def approve_mso(id):
 
         # Execute
         cur.execute(
-            "UPDATE tsd_mso_form SET tsm_approval=%s, tsm_approval_date=CURRENT_TIMESTAMP WHERE id=%s", (1, id))
+            "UPDATE tsd_mso_form SET tsm_approval=%s, tsm_approval_date=CURRENT_TIMESTAMP WHERE id=%s",
+            (1, id))
 
         # Commit to DB
         mysql.connection.commit()
@@ -310,7 +402,8 @@ def approve_mso(id):
 
         # Update
         cur.execute(
-            "UPDATE tsd_mso_form SET supervisor_approval=%s, supervisor_approval_date=CURRENT_TIMESTAMP WHERE id=%s", (1, id))
+            "UPDATE tsd_mso_form SET supervisor_approval=%s, supervisor_approval_date=CURRENT_TIMESTAMP WHERE id=%s",
+            (1, id))
 
         # Commit to DB
         mysql.connection.commit()
@@ -325,6 +418,7 @@ def approve_mso(id):
     print "Ajax is called id = " + id
     return "nothing"
 
+
 # Edit MSO
 @app.route('/mso/edit/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
@@ -334,20 +428,20 @@ def edit_mso(id):
 
     # Get who requested this MSO and the requester's email
     cur.execute(
-        "SELECT requested_by_other_department FROM tsd_mso_form WHERE id = %s", [id])
+        "SELECT requested_by_other_department FROM tsd_mso_form WHERE id = %s",
+        [id])
 
     requested_by_other_department = cur.fetchone()[
         'requested_by_other_department']
 
     cur.execute("SELECT posted_by FROM tsd_mso_form WHERE id = %s", [id])
 
-    posted_by = cur.fetchone()['posted_by']
-
+    posted_by = cur.fetchone()['posted_by'].encode('utf-8')
     if requested_by_other_department:
         if request.method == 'POST':
             # Get previous user for this MSO
-            cur.execute(
-                "SELECT posted_by FROM tsd_mso_form WHERE id = %s", [id])
+            cur.execute("SELECT posted_by FROM tsd_mso_form WHERE id = %s",
+                        [id])
 
             section = request.form.get('section')
             actual_work_description = request.form.get(
@@ -363,16 +457,16 @@ def edit_mso(id):
             cur = mysql.connection.cursor()
 
             # Execute
-            cur.execute("UPDATE tsd_mso_form SET work_compleated_by=%s, date_compleated=%s, date_started=%s,actual_work_descripition=%s, section=%s WHERE id=%s",
-                        (work_completed_by, date_completed, date_started, actual_work_description, section, id))
+            cur.execute(
+                "UPDATE tsd_mso_form SET work_compleated_by=%s, date_compleated=%s, date_started=%s,actual_work_descripition=%s, section=%s WHERE id=%s",
+                (work_completed_by, date_completed, date_started,
+                 actual_work_description, section, id))
 
             # Commit to DB
             mysql.connection.commit()
 
             # Close connection
             cur.close()
-
-            flash('MSO Compleated', 'success')
 
             return redirect(url_for('all_mso'))
 
@@ -381,7 +475,8 @@ def edit_mso(id):
         mso = cur.fetchone()
         # Get technicians
         cur.execute(
-            "SELECT first_name, last_name FROM users WHERE job_title=%s", ['technician'])
+            "SELECT first_name, last_name FROM users WHERE job_title=%s",
+            ['technician'])
         all_technicians = cur.fetchall()
         # Close Connection
         cur.close()
@@ -389,17 +484,20 @@ def edit_mso(id):
         technicians = []
         for i in all_technicians:
 
-            technicians.append(i['first_name'].encode('utf8').capitalize(
-            ) + ' ' + i['last_name'].encode('utf8').capitalize())
+            technicians.append(i['first_name'].encode('utf8').capitalize() +
+                               ' ' +
+                               i['last_name'].encode('utf8').capitalize())
 
         mso['work_compleated_by'] = ''
-        return render_template('edit_mso.html', mso=mso, technicians=technicians)
+        return render_template(
+            'edit_mso.html', mso=mso, technicians=technicians, current_user=current_user())
 
-    elif current_user()['first_name'] == posted_by:
+    elif posted_by == current_user()['first_name'] + ' ' + current_user(
+    )['last_name']:
         if request.method == 'POST':
             # Get previous user for this MSO
-            cur.execute(
-                "SELECT posted_by FROM tsd_mso_form WHERE id = %s", [id])
+            cur.execute("SELECT posted_by FROM tsd_mso_form WHERE id = %s",
+                        [id])
 
             requested_by = request.form.get('requested_by')
             section = request.form.get('section')
@@ -418,8 +516,11 @@ def edit_mso(id):
             cur = mysql.connection.cursor()
 
             # Execute
-            cur.execute("UPDATE tsd_mso_form SET work_compleated_by=%s, date_compleated=%s, date_started=%s,actual_work_descripition=%s, description_of_service=%s, location=%s, department_head=%s, requested_by=%s, section=%s WHERE id=%s",
-                        (work_completed_by, date_completed, date_started, actual_work_description, description_of_service, location, department_head, requested_by, section, id))
+            cur.execute(
+                "UPDATE tsd_mso_form SET work_compleated_by=%s, date_compleated=%s, date_started=%s,actual_work_descripition=%s, description_of_service=%s, location=%s, department_head=%s, requested_by=%s, section=%s WHERE id=%s",
+                (work_completed_by, date_completed, date_started,
+                 actual_work_description, description_of_service, location,
+                 department_head, requested_by, section, id))
 
             # Commit to DB
             mysql.connection.commit()
@@ -438,24 +539,31 @@ def edit_mso(id):
 
             # Get technicians
             cur.execute(
-                "SELECT first_name, last_name FROM users WHERE job_title=%s", ['technician'])
+                "SELECT first_name, last_name FROM users WHERE job_title=%s",
+                ['technician'])
             all_technicians = cur.fetchall()
             # Close Connection
             cur.close()
 
             technicians = []
             for i in all_technicians:
-                technicians.append(i['first_name'].encode('utf8').capitalize() +
-                                   ' ' + i['last_name'].encode('utf8').capitalize())
+                technicians.append(
+                    i['first_name'].encode('utf8').capitalize() + ' ' +
+                    i['last_name'].encode('utf8').capitalize())
 
-            return render_template('edit_mso.html', mso=mso, technicians=technicians)
-    # elif:
+            return render_template(
+                'edit_mso.html',
+                mso=mso,
+                technicians=technicians,
+                current_user=current_user())
 
     else:
         msg = 'Only ' + posted_by.capitalize() + ' can edit this MSO.'
-        return render_template('not_authorized.html', msg=msg, mso=mso)
-
-
+        return render_template(
+            'not_authorized.html',
+            msg=msg,
+            mso=mso,
+            current_user=current_user())
 
     # Create cursor
     cur = mysql.connection.cursor()
@@ -480,8 +588,8 @@ def edit_mso(id):
         cur = mysql.connection.cursor()
         app.logger.info(title)
         # Execute
-        cur.execute(
-            "UPDATE articles SET title=%s, body=%s WHERE id=%s", (title, body, id))
+        cur.execute("UPDATE articles SET title=%s, body=%s WHERE id=%s",
+                    (title, body, id))
         # Commit to DB
         mysql.connection.commit()
 
@@ -508,11 +616,13 @@ def mso_request():
         # Create Cursor
         cur = mysql.connection.cursor()
         # Get current user
-        user_email = current_user()['first_name']
+        user = current_user()['first_name'] + ' ' + current_user()['last_name']
 
         # Execute
-        cur.execute("INSERT INTO tsd_mso_form(posted_by, requested_by, department_head, location, description_of_service, requested_by_other_department) VALUES(%s, %s, %s, %s, %s, %s)",
-                    (user_email, requested_by, department_head, location, description_of_service, 1))
+        cur.execute(
+            "INSERT INTO tsd_mso_form(posted_by, requested_by, department_head, location, description_of_service, requested_by_other_department) VALUES(%s, %s, %s, %s, %s, %s)",
+            (user, requested_by, department_head, location,
+             description_of_service, 1))
 
         # Commit to DB
         mysql.connection.commit()
@@ -524,7 +634,8 @@ def mso_request():
 
         return redirect(url_for('mso_request'))
 
-    return render_template('mso_request.html', current_user=current_user()['first_name'], email=current_user()['email'])
+    return render_template('mso_request.html', current_user=current_user())
+
 
 # Delete MSO
 @app.route('/mso/delete/<string:id>', methods=['GET', 'POST'])
@@ -535,8 +646,9 @@ def delete_mso(id):
 
     # Get MSO by id
     cur.execute("SELECT * FROM tsd_mso_form WHERE id = %s", [id])
-    posted_by = cur.fetchone()['posted_by']
-    if current_user()['first_name'] == posted_by:
+    id_number = cur.fetchone()['id_number']
+    print(id_number.encode('utf8'), str(current_user()['id']))
+    if str(current_user()['id']) == id_number.encode('utf8'):
         # Execute
         cur.execute("DELETE FROM tsd_mso_form WHERE id = %s", [id])
 
@@ -550,8 +662,6 @@ def delete_mso(id):
     else:
         msg = 'Only ' + posted_by.capitalize() + ' can delete this MSO.'
         return render_template('not_authorized.html', msg=msg)
-
-
 
     # Create cursor
     cur = mysql.connection.cursor()
